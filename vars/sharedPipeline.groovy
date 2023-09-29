@@ -27,6 +27,7 @@ def call(int buildNumber) {
                         echo ' I execute everything else'
                         env.TAG = env.VERSION + "-" + env.BRANCH_NAME + "-" + env.BUILD_NUMBER
                     }
+                    env.TAG = env.TAG.replace("-", "/")
                 }
                 echo "${TAG}"
                 echo "${CI_REGISTRY_IMAGE}"
