@@ -1,4 +1,4 @@
-package com.github.rubenalbi.sample
+package com.github.jglick.sample
 public class RunWrapperExt {
     def delegate
     def steps
