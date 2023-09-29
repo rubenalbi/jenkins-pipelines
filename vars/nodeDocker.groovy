@@ -6,7 +6,7 @@ def call() {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('gitlab-credentials')
-        CI_REGISTRY_IMAGE = "registry.gitlab.com/rubenalbi/"
+        REGISTRY_URL = "registry.gitlab.com/rubenalbi/"
     }
     stages {
         stage("Configure") {
@@ -15,7 +15,7 @@ def call() {
                 script {
                     def props = readJSON(file: 'package.json')
                     env.VERSION = props.version
-                    env.CI_REGISTRY_IMAGE = env.CI_REGISTRY_IMAGE + props.name
+                    env.CI_REGISTRY_IMAGE = env.REGISTRY_URL + props.name
 
                     if (env.BRANCH_NAME == 'master') {
                         echo 'I only execute on the master branch'
