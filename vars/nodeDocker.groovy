@@ -82,6 +82,11 @@ def call() {
         }
         stage('Deploy') {
             steps {
+                script {
+                    env.RELEASE_SCOPE = input message: 'User input required', ok: 'Release!',
+                            parameters: [choice(name: 'RELEASE_SCOPE', choices: 'patch\nminor\nmajor', description: 'What is the release scope?')]
+                }
+                echo "${env.RELEASE_SCOPE}"
                 sshagent(credentials : ['aws-nginx-server']){
                         sh 'ssh -tt -o StrictHostKeyChecking=no $SSH_CONNECTION ls -l'
                         sh 'ssh $SSH_CONNECTION docker ps'
