@@ -92,7 +92,7 @@ def call() {
                         sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose down || true"'
                         sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose rm || true"'
                         sh 'ssh $SSH_CONNECTION docker image prune -a -f || true'
-                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && echo \'VERSION=1.0.0-2\' > .env || true"'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && echo \'VERSION=$TAG\' > .env || true"'
                         sh 'ssh $SSH_CONNECTION docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
                         sh 'ssh $SSH_CONNECTION docker pull $CI_REGISTRY_IMAGE:$TAG'
                         sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose --env-file .env up -d"'
