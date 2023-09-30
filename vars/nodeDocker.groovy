@@ -9,7 +9,7 @@ def call() {
         REGISTRY_URL = "registry.gitlab.com/rubenalbi/"
         GITLAB_TOKEN = credentials('gitlab-token')
         SSH_CONNECTION = "ubuntu@13.37.81.165"
-        COMPOSE_PATH = "/opt/docker/ms-node-auth"
+        DOCKER_PATH = "/opt/docker/"
     }
     stages {
         stage("Configure") {
@@ -19,6 +19,7 @@ def call() {
                     def props = readJSON(file: 'package.json')
                     env.VERSION = props.version
                     env.CI_REGISTRY_IMAGE = env.REGISTRY_URL + props.name
+                    env.COMPOSE_PATH = env.DOCKER_PATH + props.name
 
                     if (env.BRANCH_NAME == 'master') {
                         echo 'I only execute on the master branch'
