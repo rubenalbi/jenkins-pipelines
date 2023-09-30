@@ -7,6 +7,9 @@ def call() {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('gitlab-credentials')
         REGISTRY_URL = "registry.gitlab.com/rubenalbi/"
+        GITLAB_TOKEN = credentials('gitlab-token')
+        SSH_CONNECTION = "ubuntu@13.37.81.165"
+        COMPOSE_PATH = "/opt/docker/ms-node-auth"
     }
     stages {
         stage("Configure") {
@@ -75,6 +78,22 @@ def call() {
         stage('Push') {
             steps {
                 sh 'docker push $CI_REGISTRY_IMAGE:$TAG'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sshagent(credentials : ['aws-nginx-server']){
+                        sh 'ssh -tt -o StrictHostKeyChecking=no $SSH_CONNECTION ls -l'
+                        sh 'ssh $SSH_CONNECTION docker ps'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose down || true"'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose rm || true"'
+                        sh 'ssh $SSH_CONNECTION docker image prune -a -f || true'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && echo \'VERSION=1.0.0-2\' > .env || true"'
+                        sh 'ssh $SSH_CONNECTION docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
+                        sh 'ssh $SSH_CONNECTION docker pull $CI_REGISTRY_IMAGE:$TAG'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose --env-file .env up -d"'
+
+                }
             }
         }
     }
