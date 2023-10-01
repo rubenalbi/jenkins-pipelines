@@ -38,7 +38,7 @@ def call(String portMap) {
                 echo "${CI_REGISTRY_IMAGE}"
                 echo "${env.VERSION}"
                 echo "${VERSION}"
-                echo portMap
+                echo "Port mapping docker ${portMap}"
                 //$CI_REGISTRY_IMAGE:$VERSION-$BRANCH_NAME-$BUILD_NUMBER 
                 
             }
@@ -97,7 +97,7 @@ def call(String portMap) {
                         sh 'ssh $SSH_CONNECTION docker image prune -a -f || true'
                         sh 'ssh $SSH_CONNECTION docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
                         sh 'ssh $SSH_CONNECTION docker pull $CI_REGISTRY_IMAGE:$TAG'
-                        sh 'ssh $SSH_CONNECTION "docker run --name $CI_PROJECT_NAME -p 2000:80 --restart unless-stopped -d $CI_REGISTRY_IMAGE:$TAG"'
+                        sh 'ssh $SSH_CONNECTION "docker run --name $CI_PROJECT_NAME -p $portMap --restart unless-stopped -d $CI_REGISTRY_IMAGE:$TAG"'
 
                 }
             }
