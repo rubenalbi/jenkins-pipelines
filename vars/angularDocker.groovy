@@ -55,18 +55,6 @@ def call(String portMap) {
                 //sh 'npm run build'
             }
         }
-        stage('Build') {
-             agent {
-                docker {
-                    image 'node:18.18.0-alpine3.18' 
-                    args '-p 3000:3000' 
-                }
-            }
-            steps {
-                sh 'npm install'
-                sh 'npm run build'
-            }
-        }
         stage('Docker login') {
             steps {
                 sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
@@ -74,8 +62,7 @@ def call(String portMap) {
         }
         stage('Build Angular Docker') {
             steps {
-                echo "Building ${VERSION}"
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                echo "Building ${TAG}"
                 sh 'docker build --build-arg VERSION="$TAG" --pull -t $CI_REGISTRY_IMAGE:$TAG .'
             }
         }
