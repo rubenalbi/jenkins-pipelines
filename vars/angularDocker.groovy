@@ -75,7 +75,7 @@ def call(String portMap) {
             steps {
                 echo "Building ${VERSION}"
                 sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                sh 'docker build VERSION="$TAG" --pull -t $CI_REGISTRY_IMAGE:$TAG .'
+                sh 'docker build --build-arg VERSION="$TAG" --pull -t $CI_REGISTRY_IMAGE:$TAG .'
             }
         }
         stage('Push') {
