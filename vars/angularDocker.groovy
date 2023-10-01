@@ -38,6 +38,7 @@ def call(String portMap) {
                 echo "${CI_REGISTRY_IMAGE}"
                 echo "${env.VERSION}"
                 echo "${VERSION}"
+                echo portMap
                 //$CI_REGISTRY_IMAGE:$VERSION-$BRANCH_NAME-$BUILD_NUMBER 
                 
             }
