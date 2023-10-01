@@ -62,6 +62,7 @@ def call(String portMap) {
                 }
             }
             steps {
+                sh 'npm install'
                 sh 'npm run build'
             }
         }
