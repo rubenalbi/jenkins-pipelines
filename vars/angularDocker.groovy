@@ -21,6 +21,7 @@ def call(String portMap) {
                     env.CI_REGISTRY_IMAGE = env.REGISTRY_URL + props.name
                     env.COMPOSE_PATH = env.DOCKER_PATH + props.name
                     env.CI_PROJECT_NAME = props.name
+                    env.PORT_MAP = portMap
 
                     if (env.BRANCH_NAME == 'master') {
                         echo 'I only execute on the master branch'
@@ -38,7 +39,7 @@ def call(String portMap) {
                 echo "${CI_REGISTRY_IMAGE}"
                 echo "${env.VERSION}"
                 echo "${VERSION}"
-                echo "Port mapping docker ${portMap}"
+                echo "Port mapping docker ${PORT_MAP}"
                 //$CI_REGISTRY_IMAGE:$VERSION-$BRANCH_NAME-$BUILD_NUMBER 
                 
             }
@@ -84,7 +85,7 @@ def call(String portMap) {
                         sh 'ssh $SSH_CONNECTION docker image prune -a -f || true'
                         sh 'ssh $SSH_CONNECTION docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
                         sh 'ssh $SSH_CONNECTION docker pull $CI_REGISTRY_IMAGE:$TAG'
-                        sh 'ssh $SSH_CONNECTION "docker run --name $CI_PROJECT_NAME -p $portMap --restart unless-stopped -d $CI_REGISTRY_IMAGE:$TAG"'
+                        sh 'ssh $SSH_CONNECTION "docker run --name $CI_PROJECT_NAME -p $PORT_MAP --restart unless-stopped -d $CI_REGISTRY_IMAGE:$TAG"'
 
                 }
             }
