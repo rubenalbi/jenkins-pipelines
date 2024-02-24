@@ -9,7 +9,6 @@ def call() {
         REGISTRY_URL = "registry.gitlab.com/rubenalbi/"
         GITLAB_TOKEN = credentials('gitlab-token')
         SSH_CONNECTION = "ubuntu@13.37.81.165"
-        SSH_CONNECTION_PRE = "ruben@homeserver.rubenalbiach.com"
         DOCKER_PATH = "/opt/docker/"
     }
     stages {
@@ -87,7 +86,26 @@ def call() {
                 branch 'develop'
             }
             steps {
-                sshagent(credentials : ['homeserver-ssh']){
+                script {
+                    def remote = [:]
+                    remote.name = 'ruben'
+                    remote.host = 'homeserver.rubenalbiach.com'
+                    remote.allowAnyHosts = true
+                    withCredentials([usernamePassword(
+                        credentialsId: 'homeserver-ssh', passwordVariable: 'userPassword', usernameVariable: 'userName')]) {
+                        remote.user = userName
+                        remote.password = userPassword
+                        sshCommand remote: remote, command: 'docker ps'
+                        sshCommand remote: remote, command: 'cd $COMPOSE_PATH && docker-compose down || true'
+                        sshCommand remote: remote, command: 'cd $COMPOSE_PATH && docker-compose rm || true'
+                        sshCommand remote: remote, command: 'docker image prune -a -f || true'
+                        sshCommand remote: remote, command: 'cd $COMPOSE_PATH && echo \'VERSION=$TAG\' > .env || true'
+                        sshCommand remote: remote, command: 'docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
+                        sshCommand remote: remote, command: 'docker pull $CI_REGISTRY_IMAGE:$TAG'
+                        sshCommand remote: remote, command: 'cd $COMPOSE_PATH && docker-compose --env-file .env up -d'
+                    }
+                }
+                /*sshagent(credentials : ['homeserver-ssh']){
                         sh 'ssh -tt -o StrictHostKeyChecking=no $SSH_CONNECTION_PRE ls -l'
                         sh 'ssh $SSH_CONNECTION_PRE docker ps'
                         sh 'ssh $SSH_CONNECTION_PRE "cd $COMPOSE_PATH && docker-compose down || true"'
@@ -98,7 +116,7 @@ def call() {
                         sh 'ssh $SSH_CONNECTION_PRE docker pull $CI_REGISTRY_IMAGE:$TAG'
                         sh 'ssh $SSH_CONNECTION_PRE "cd $COMPOSE_PATH && docker-compose --env-file .env up -d"'
 
-                }
+                }*/
             }
         }
         stage('Deploy PRO') {
