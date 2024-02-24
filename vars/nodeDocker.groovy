@@ -9,6 +9,7 @@ def call() {
         REGISTRY_URL = "registry.gitlab.com/rubenalbi/"
         GITLAB_TOKEN = credentials('gitlab-token')
         SSH_CONNECTION = "ubuntu@13.37.81.165"
+        SSH_CONNECTION_PRE = "ruben@homeserver.rubenalbiach.com"
         DOCKER_PATH = "/opt/docker/"
     }
     stages {
@@ -86,9 +87,17 @@ def call() {
                 branch 'develop'
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'homeserver-ssh', usernameVariable: 'userName', passwordVariable: 'userPassword')]) {
-                    sh 'cf login homeserver.rubenalbiach.com -u $userName -p $userPassword'
-                    sh 'docker ps'
+                sshagent(credentials : ['homeserver-key']){
+                        sh 'ssh -tt -o StrictHostKeyChecking=no $SSH_CONNECTION_PRE ls -l'
+                        sh 'ssh $SSH_CONNECTION_PRE docker ps'
+                        sh 'ssh $SSH_CONNECTION_PRE "cd $COMPOSE_PATH && docker-compose down || true"'
+                        sh 'ssh $SSH_CONNECTION_PRE "cd $COMPOSE_PATH && docker-compose rm || true"'
+                        sh 'ssh $SSH_CONNECTION_PRE docker image prune -a -f || true'
+                        sh 'ssh $SSH_CONNECTION_PRE "cd $COMPOSE_PATH && echo \'VERSION=$TAG\' > .env || true"'
+                        sh 'ssh $SSH_CONNECTION_PRE docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
+                        sh 'ssh $SSH_CONNECTION_PRE docker pull $CI_REGISTRY_IMAGE:$TAG'
+                        sh 'ssh $SSH_CONNECTION_PRE "cd $COMPOSE_PATH && docker-compose --env-file .env up -d"'
+
                 }
 /*
                 script {
