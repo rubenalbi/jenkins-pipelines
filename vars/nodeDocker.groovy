@@ -9,6 +9,7 @@ def call() {
         REGISTRY_URL = "registry.gitlab.com/rubenalbi/"
         GITLAB_TOKEN = credentials('gitlab-token')
         SSH_CONNECTION = "ubuntu@13.37.81.165"
+        SSH_CONNECTION_PRE = "ruben@homeserver.rubenalbiach.com"
         DOCKER_PATH = "/opt/docker/"
     }
     stages {
@@ -21,7 +22,7 @@ def call() {
                     env.CI_REGISTRY_IMAGE = env.REGISTRY_URL + props.name
                     env.COMPOSE_PATH = env.DOCKER_PATH + props.name
 
-                    if (env.BRANCH_NAME == 'master') {
+                    if (env.BRANCH_NAME == 'main') {
                         echo 'I only execute on the master branch'
                         env.TAG = env.VERSION
                     } else if (env.BRANCH_NAME == 'develop') {
@@ -81,9 +82,28 @@ def call() {
                 sh 'docker push $CI_REGISTRY_IMAGE:$TAG'
             }
         }
-        stage('Deploy') {
+        stage('Deploy PRE') {
             when {
                 branch 'develop'
+            }
+            steps {
+                sshagent(credentials : ['homeserver-ssh']){
+                        sh 'ssh -tt -o StrictHostKeyChecking=no $SSH_CONNECTION ls -l'
+                        sh 'ssh $SSH_CONNECTION docker ps'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose down || true"'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose rm || true"'
+                        sh 'ssh $SSH_CONNECTION docker image prune -a -f || true'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && echo \'VERSION=$TAG\' > .env || true"'
+                        sh 'ssh $SSH_CONNECTION docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
+                        sh 'ssh $SSH_CONNECTION docker pull $CI_REGISTRY_IMAGE:$TAG'
+                        sh 'ssh $SSH_CONNECTION "cd $COMPOSE_PATH && docker-compose --env-file .env up -d"'
+
+                }
+            }
+        }
+        stage('Deploy PRO') {
+            when {
+                branch 'main'
             }
             steps {
                 sshagent(credentials : ['aws-nginx-server']){
