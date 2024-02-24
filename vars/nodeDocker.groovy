@@ -86,6 +86,10 @@ def call() {
                 branch 'develop'
             }
             steps {
+                withCredentials([usernamePassword(credentialsId: 'homeserver-ssh', usernameVariable: 'userName', passwordVariable: 'userPassword')]) {
+                    sh 'docker ps homeserver.rubenalbiach.com -u $userName -p $userPassword'
+                }
+/*
                 script {
                     def remote = [:]
                     remote.name = 'ruben'
@@ -105,7 +109,7 @@ def call() {
                         sshCommand remote: remote, command: 'cd $COMPOSE_PATH && docker-compose --env-file .env up -d'
                     }
                 }
-                /*sshagent(credentials : ['homeserver-ssh']){
+                sshagent(credentials : ['homeserver-ssh']){
                         sh 'ssh -tt -o StrictHostKeyChecking=no $SSH_CONNECTION_PRE ls -l'
                         sh 'ssh $SSH_CONNECTION_PRE docker ps'
                         sh 'ssh $SSH_CONNECTION_PRE "cd $COMPOSE_PATH && docker-compose down || true"'
