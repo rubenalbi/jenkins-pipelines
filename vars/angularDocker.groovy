@@ -9,6 +9,7 @@ def call(String portMap) {
         REGISTRY_URL = "registry.gitlab.com/rubenalbi/"
         GITLAB_TOKEN = credentials('gitlab-token')
         SSH_CONNECTION = "ubuntu@13.37.81.165"
+        SSH_CONNECTION_PRE = "ruben@homeserver.rubenalbiach.com"
         DOCKER_PATH = "/opt/docker/"
     }
     stages {
@@ -47,8 +48,7 @@ def call(String portMap) {
         stage('Test') {
              agent {
                 docker {
-                    image 'node:18.18.0-alpine3.18' 
-                    args '-p 3000:3000' 
+                    image 'node:18.18.0-alpine3.18'
                 }
             }
             steps {
@@ -72,9 +72,27 @@ def call(String portMap) {
                 sh 'docker push $CI_REGISTRY_IMAGE:$TAG'
             }
         }
-        stage('Deploy') {
+        stage('Deploy PRE') {
             when {
                 branch 'develop'
+            }
+            steps {
+                sshagent(credentials : ['homeserver-key']){
+                        sh 'ssh -tt -o StrictHostKeyChecking=no $SSH_CONNECTION_PRE ls -l'
+                        sh 'ssh $SSH_CONNECTION_PRE docker ps'
+                        sh 'ssh $SSH_CONNECTION_PRE "docker stop $CI_PROJECT_NAME || true"'
+                        sh 'ssh $SSH_CONNECTION_PRE "docker rm $CI_PROJECT_NAME || true"'
+                        sh 'ssh $SSH_CONNECTION_PRE docker image prune -a -f || true'
+                        sh 'ssh $SSH_CONNECTION_PRE docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
+                        sh 'ssh $SSH_CONNECTION_PRE docker pull $CI_REGISTRY_IMAGE:$TAG'
+                        sh 'ssh $SSH_CONNECTION_PRE "docker run --name $CI_PROJECT_NAME -p $PORT_MAP --restart unless-stopped -d $CI_REGISTRY_IMAGE:$TAG"'
+
+                }
+            }
+        }
+        stage('Deploy PRO') {
+            when {
+                branch 'main'
             }
             steps {
                 sshagent(credentials : ['aws-nginx-server']){
