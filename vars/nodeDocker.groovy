@@ -87,7 +87,8 @@ def call() {
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'homeserver-ssh', usernameVariable: 'userName', passwordVariable: 'userPassword')]) {
-                    sh 'docker ps homeserver.rubenalbiach.com -u $userName -p $userPassword'
+                    sh 'cf login homeserver.rubenalbiach.com -u $userName -p $userPassword'
+                    sh 'docker ps'
                 }
 /*
                 script {
