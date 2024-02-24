@@ -96,8 +96,8 @@ def call() {
                         remote.user = userName
                         remote.password = userPassword
                         sshCommand remote: remote, command: 'docker ps'
-                        sshCommand remote: remote, command: 'cd $COMPOSE_PATH && docker-compose down || true'
-                        sshCommand remote: remote, command: 'cd $COMPOSE_PATH && docker-compose rm || true'
+                        sshCommand remote: remote, command: 'cd ${COMPOSE_PATH} && docker-compose down || true'
+                        sshCommand remote: remote, command: 'cd ${env.COMPOSE_PATH} && docker-compose rm || true'
                         sshCommand remote: remote, command: 'docker image prune -a -f || true'
                         sshCommand remote: remote, command: 'cd $COMPOSE_PATH && echo \'VERSION=$TAG\' > .env || true'
                         sshCommand remote: remote, command: 'docker login -u $GITLAB_TOKEN_USR -p $GITLAB_TOKEN_PSW $REGISTRY_URL'
