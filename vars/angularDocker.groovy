@@ -61,10 +61,22 @@ def call(String portMap) {
                 sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
         }
-        stage('Build Angular Docker') {
+        stage('Build Angular Docker PRE') {
+            when {
+                branch 'develop'
+            }
             steps {
                 echo "Building ${TAG}"
-                sh 'docker build --build-arg VERSION="$TAG" --pull -t $CI_REGISTRY_IMAGE:$TAG .'
+                sh 'docker build --build-arg VERSION="$TAG" --build-arg ENV=pre --pull -t $CI_REGISTRY_IMAGE:$TAG .'
+            }
+        }
+        stage('Build Angular Docker PRO') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "Building ${TAG}"
+                sh 'docker build --build-arg VERSION="$TAG" --build-arg ENV=pro --pull -t $CI_REGISTRY_IMAGE:$TAG .'
             }
         }
         stage('Push') {
