@@ -79,7 +79,23 @@ def call(String portMap) {
                 sh 'docker build --build-arg VERSION="$TAG" --build-arg ENV=pro --pull -t $CI_REGISTRY_IMAGE:$TAG .'
             }
         }
-        stage('Push') {
+        stage('Creating TAG') {
+                when {
+                    branch 'main'
+                }
+                steps {
+                    echo "Creating tag ${TAG}"
+                    withCredentials([gitUsernamePassword(credentialsId: 'gitlab-credentials', gitToolName: 'git-tool')]) {
+                        sh 'git config --global user.email "ruben.albiach@gmail.com"'
+                        sh 'git config --global user.name "Rubén Albiach"'
+                        sh 'git tag -l | xargs git tag -d'
+                        sh 'git fetch -t'
+                        sh 'git tag -a $TAG -m "Jenkins tag"'
+                        sh 'git push origin $TAG'
+                    }
+                }
+        }
+        stage('Push Docker') {
             steps {
                 sh 'docker push $CI_REGISTRY_IMAGE:$TAG'
             }
