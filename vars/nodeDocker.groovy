@@ -70,6 +70,8 @@ def call() {
                 steps {
                     echo "Creating tag ${VERSION}"
                     withCredentials([gitUsernamePassword(credentialsId: 'gitlab-credentials', gitToolName: 'git-tool')]) {
+                        sh 'git config --global user.email "ruben.albiach@gmail.com"'
+                        sh 'git config --global user.name "Rubén Albiach"'
                         sh 'git fetch --all'
                         sh 'git tag -a $VERSION -m "Jenkins tag"'
                         sh 'git push origin $VERSION'
