@@ -24,8 +24,8 @@ def call(String portMap) {
                     env.CI_PROJECT_NAME = props.name
                     env.PORT_MAP = portMap
 
-                    if (env.BRANCH_NAME == 'master') {
-                        echo 'I only execute on the master branch'
+                    if (env.BRANCH_NAME == 'main') {
+                        echo 'I only execute on the main branch'
                         env.TAG = env.VERSION
                     } else if (env.BRANCH_NAME == 'develop') {
                         echo 'I execute on the develop branch'
