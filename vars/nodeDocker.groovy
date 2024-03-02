@@ -69,7 +69,7 @@ def call() {
             stage('Creating TAG') {
                 steps {
                     echo "Creating tag ${VERSION}"
-                    withCredentials([gitUsernamePassword(credentialsId: 'gitlab-credentialss', gitToolName: 'git-tool')]) {
+                    withCredentials([gitUsernamePassword(credentialsId: 'gitlab-credentials', gitToolName: 'git-tool')]) {
                         sh 'git fetch --all'
                         sh 'git tag -a $VERSION -m "Jenkins tag"'
                         sh 'git push origin $VERSION'
