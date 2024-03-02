@@ -66,7 +66,17 @@ def call() {
                     sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
                 }
             }
+            stage('Build docker') {
+                steps {
+                    echo "Building ${VERSION}"
+                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                    sh 'docker build --pull -t $CI_REGISTRY_IMAGE:$TAG .'
+                }
+            }
             stage('Creating TAG') {
+                when {
+                    branch 'main'
+                }
                 steps {
                     echo "Creating tag ${VERSION}"
                     withCredentials([gitUsernamePassword(credentialsId: 'gitlab-credentials', gitToolName: 'git-tool')]) {
@@ -79,14 +89,7 @@ def call() {
                     }
                 }
             }
-            stage('Build docker') {
-                steps {
-                    echo "Building ${VERSION}"
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker build --pull -t $CI_REGISTRY_IMAGE:$TAG .'
-                }
-            }
-            stage('Push') {
+            stage('Push Docker') {
                 steps {
                     sh 'docker push $CI_REGISTRY_IMAGE:$TAG'
                 }
