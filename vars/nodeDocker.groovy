@@ -68,6 +68,16 @@ def call() {
                 sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login registry.gitlab.com -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
         }
+        stage('Creating TAG') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "Creating tag ${VERSION}"
+                sh 'git tag -a $VERSION -m "Jenkins tag"'
+                sh 'git push origin $VERSION'
+            }
+        }
         stage('Build docker') {
             steps {
                 echo "Building ${VERSION}"
