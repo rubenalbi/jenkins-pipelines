@@ -40,18 +40,7 @@ def call() {
                 //$CI_REGISTRY_IMAGE:$VERSION-$BRANCH_NAME-$BUILD_NUMBER
                 }
             }
-            stage('Test') {
-                agent {
-                    docker {
-                        image 'node:18.18.0-alpine3.18'
-                    }
-                }
-                steps {
-                    echo 'Testing'
-                    sh 'npm run test'
-                }
-            }
-            stage('Build') {
+            stage('Build and test') {
                 agent {
                     docker {
                         image 'node:18.18.0-alpine3.18'
@@ -59,6 +48,7 @@ def call() {
                 }
                 steps {
                     sh 'npm install'
+                    sh 'npm run test'
                 }
             }
             stage('Docker login') {
