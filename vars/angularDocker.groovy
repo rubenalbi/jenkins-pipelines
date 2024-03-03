@@ -63,7 +63,9 @@ def call(String portMap) {
         }
         stage('Build Angular Docker PRE') {
             when {
-                branch 'develop'
+                not {
+                    branch 'main'
+                }
             }
             steps {
                 echo "Building ${TAG}"
