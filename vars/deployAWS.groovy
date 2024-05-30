@@ -3,7 +3,7 @@ pipeline {
     environment {
         GITLAB_TOKEN = credentials('gitlab-token')
         REGISTRY_URL = "registry.gitlab.com/rubenalbi"
-        SSH_CONNECTION = "ubuntu@13.37.81.165"
+        SSH_CONNECTION = "ubuntu@ec2-13-38-101-30.eu-west-3.compute.amazonaws.com"
         COMPOSE_PATH = "/opt/docker/ms-node-auth"
     }
     stages {
