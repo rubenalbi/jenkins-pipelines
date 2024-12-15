@@ -7,7 +7,7 @@ def call() {
             DOCKERHUB_CREDENTIALS = credentials('gitlab-credentials')
             REGISTRY_URL = 'registry.gitlab.com/rubenalbi/'
             GITLAB_TOKEN = credentials('gitlab-token')
-            SSH_CONNECTION = 'ubuntu@ec2-13-38-101-30.eu-west-3.compute.amazonaws.com'
+            SSH_CONNECTION = 'ubuntu@ec2-15-188-194-92.eu-west-3.compute.amazonaws.com'
             SSH_CONNECTION_PRE = 'ruben@homeserver.rubenalbiach.com'
             DOCKER_PATH = '/opt/docker/'
         }
